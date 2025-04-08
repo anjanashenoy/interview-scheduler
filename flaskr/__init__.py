@@ -48,11 +48,4 @@ def create_app(test_config=None):
     # the tutorial the blog will be the main index
     app.add_url_rule("/", endpoint="index")
 
-    from flaskr.db import init_db
-
-    @app.cli.command("init-db")
-    def init_db_command():
-        init_db()
-        print("Initialized the database.")
-
     return app
