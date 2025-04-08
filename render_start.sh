@@ -1,4 +1,5 @@
 #!/bin/bash
 
 pip install -e .
-flask --app flaskr init-db
+flask db upgrade
+gunicorn flaskr:app --bind 0.0.0.0:$PORT
