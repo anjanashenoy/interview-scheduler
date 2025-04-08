@@ -8,6 +8,7 @@ maintainers = [{name = "Pallets", email = "contact@palletsprojects.com"}]
 classifiers = ["Private :: Do Not Upload"]
 dependencies = [
     "flask",
+    "gunicorn",
 ]
 
 [project.urls]
