@@ -27,12 +27,15 @@ def load_user(user_id):
 
 @app.route('/')
 def index():
-    users = User.query.all()
-    user_list = [f"ID: {user.id}, Username: {user.username}, Email: {user.email}" for user in users]
-    return "<br>".join(user_list)  
+    if current_user.is_authenticated:
+        return redirect(url_for('jobs')) 
+    return redirect(url_for('login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if current_user.is_authenticated:
+        return redirect(url_for('jobs'))
+
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -50,11 +53,11 @@ def login():
     return render_template('login.html')
 
 @app.route('/jobs')
-@login_required 
 def jobs():
-    return f'Welcome, {current_user.username}! Browse open jobs here.'
+    return render_template('jobs.html')
 
-@app.route('/logout')
+@app.route('/logout', methods=['POST'])
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
