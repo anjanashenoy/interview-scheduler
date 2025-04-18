@@ -1,0 +1,101 @@
+<!-- student_dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Dashboard</title>
+    <!-- Bootstrap 5 CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Interview Scheduler</a>
+            <div class="d-flex align-items-center ms-auto">
+                <span class="text-white me-3">Welcome, {{ name }}!</span>
+                <a href="#" class="btn btn-outline-light btn-sm me-2">My Profile</a>
+                <form action="{{ url_for('main.logout') }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Left Section: Open Jobs -->
+            <div class="col-md-8">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Open Jobs</h2>
+                </div>
+
+                <div class="list-group">
+                    <!-- Dynamic Job Listings -->
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">Software Engineer</h5>
+                            <p class="mb-1">React and Node.js experience required. Full-time, remote position.</p>
+                            <span class="badge bg-secondary">Full-time</span>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">Product Manager</h5>
+                            <p class="mb-1">Work with cross-functional teams to create new products.</p>
+                            <span class="badge bg-secondary">Part-time</span>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">UX Designer</h5>
+                            <p class="mb-1">Design user-centric products, collaborate with engineering teams.</p>
+                            <span class="badge bg-secondary">Full-time</span>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
+                    </div>
+                    <!-- Add more dynamic job listings here -->
+                </div>
+            </div>
+
+            <!-- Right Section: Upcoming Interviews -->
+            <div class="col-md-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Upcoming Interviews</h2>
+                </div>
+
+                <div class="list-group">
+                    <!-- Dynamic Upcoming Interviews -->
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">Software Engineer Interview</h5>
+                            <p class="mb-1">Monday, April 20 at 10:00 AM</p>
+                            <span class="badge bg-info text-dark">Scheduled</span>
+                        </div>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">Product Manager Interview</h5>
+                            <p class="mb-1">Tuesday, April 21 at 02:00 PM</p>
+                            <span class="badge bg-info text-dark">Scheduled</span>
+                        </div>
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-1">UX Designer Interview</h5>
+                            <p class="mb-1">Thursday, April 23 at 11:00 AM</p>
+                            <span class="badge bg-info text-dark">Scheduled</span>
+                        </div>
+                    </div>
+                    <!-- Add more dynamic upcoming interviews here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

@@ -1,0 +1,140 @@
+<!-- jobs.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Recruiter Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Interview Scheduler</a>
+            <div class="d-flex align-items-center ms-auto">
+                <span class="text-white me-3">Welcome, {{ name }}!</span>
+                <form action="{{ url_for('main.logout') }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">My Jobs</h2>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createJobModal">
+                Create Job
+            </button>
+        </div>
+
+        <!-- Jobs Section -->
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            {% for job in jobs %}
+            <div class="col">
+                <div class="card shadow-sm h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ job.position }}</h5>
+                        <p class="card-text">{{ job.description }}</p>
+                        <span class="badge bg-secondary">{{ job.job_type }}</span>
+                        <a href="#" class="btn btn-sm btn-outline-primary mt-3">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Upcoming Interviews Section -->
+        <hr class="my-5">
+        <h3>Upcoming Interviews</h3>
+        <ul class="list-group">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Monday, April 20 at 10:00 AM for <strong>Software Engineer</strong>
+                <span class="badge bg-info text-dark">Scheduled</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Tuesday, April 21 at 02:00 PM for <strong>Product Manager</strong>
+                <span class="badge bg-info text-dark">Scheduled</span>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Create Job Modal -->
+    <div class="modal fade" id="createJobModal" tabindex="-1" aria-labelledby="createJobModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <form method="post" action="{{ url_for('main.create_job') }}">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="createJobModalLabel">Create Job</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="position" class="form-label">Position</label>
+                            <input type="text" class="form-control" id="position" name="position" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="job_type" class="form-label">Job Type</label>
+                            <select class="form-select" id="job_type" name="job_type" required>
+                                <option value="Full-time">Full-time</option>
+                                <option value="Part-time">Part-time</option>
+                                <option value="Internship">Internship</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="location" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" required>
+                        </div>
+
+                        <!-- Time Slots -->
+                        <div class="mb-3">
+                            <label class="form-label">Interview Time Slots</label>
+                            <div id="timeSlotsContainer">
+                                <div class="input-group mb-2">
+                                    <input type="datetime-local" name="time_slots[]" class="form-control" required>
+                                    <button class="btn btn-outline-danger remove-slot-btn" type="button">Remove</button>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-outline-secondary btn-sm" id="addTimeSlotBtn">+ Add Time Slot</button>
+                        </div>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const container = document.getElementById('timeSlotsContainer');
+        const addBtn = document.getElementById('addTimeSlotBtn');
+
+        addBtn.addEventListener('click', () => {
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'input-group mb-2';
+            slotDiv.innerHTML = `
+                <input type="datetime-local" name="time_slots[]" class="form-control" required>
+                <button class="btn btn-outline-danger remove-slot-btn" type="button">Remove</button>
+            `;
+            container.appendChild(slotDiv);
+        });
+
+        container.addEventListener('click', (e) => {
+            if (e.target.classList.contains('remove-slot-btn')) {
+                e.target.closest('.input-group').remove();
+            }
+        });
+    </script>
+</body>
+</html>
