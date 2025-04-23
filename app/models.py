@@ -16,17 +16,11 @@ class User(db.Model, UserMixin):
     student = db.relationship('Student', backref='user', uselist=False)
     recruiter = db.relationship('Recruiter', backref='user', uselist=False)
 
-    def __repr__(self):
-        return f'<User {self.email}>'
-
 class Student(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
     university_id = db.Column(db.Integer, db.ForeignKey('university.id'))
     university = db.relationship('University', backref='students')
     references = db.relationship('Reference', backref='student', lazy=True)
-
-    def __repr__(self):
-        return f'<Student {self.user_id}>'
 
 class Recruiter(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
@@ -35,26 +29,17 @@ class Recruiter(db.Model):
     company = db.relationship('Company', backref='recruiters')
     jobs = db.relationship('Job', backref='recruiter', lazy=True)
 
-    def __repr__(self):
-        return f'<Recruiter {self.user_id}>'
-
 class University(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     phone = db.Column(db.String(15))
     address = db.Column(db.String(200))
 
-    def __repr__(self):
-        return f'<University {self.name}>'
-
 class Company(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
     phone = db.Column(db.String(15))
     address = db.Column(db.String(200))
-
-    def __repr__(self):
-        return f'<Company {self.name}>'
 
 class Reference(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -66,9 +51,6 @@ class Reference(db.Model):
     email = db.Column(db.String(120))
     phone = db.Column(db.String(15))
 
-    def __repr__(self):
-        return f'<Reference {self.name}>'
-
 class Job(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     recruiter_id = db.Column(db.Integer, db.ForeignKey('recruiter.user_id'))
@@ -77,9 +59,6 @@ class Job(db.Model):
     description = db.Column(db.Text)
     location = db.Column(db.String(50))
     interview_slots = db.relationship('InterviewSlot', backref='job', lazy=True)
-
-    def __repr__(self):
-        return f'<Job {self.position}>'
 
 class InterviewSlot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -92,6 +71,3 @@ class InterviewSlot(db.Model):
     next_steps = db.Column(db.String(5000), nullable=True)
 
     student = db.relationship('Student', backref='interview_slot')
-
-    def __repr__(self):
-        return f'<InterviewSlot {self.datetime}>'

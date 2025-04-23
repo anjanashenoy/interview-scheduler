@@ -32,34 +32,82 @@
                     <h2 class="mb-0">Open Jobs</h2>
                 </div>
 
+                <!-- Filter Controls -->
+                <form class="row g-3 mb-4">
+                    <div class="col-md-5">
+                        <label for="jobTypeFilter" class="form-label">Filter by Job Type</label>
+                        <select id="jobTypeFilter" class="form-select">
+                            <option selected>All Job Types</option>
+                            <option value="Full-Time">Full-Time</option>
+                            <option value="Part-Time">Part-Time</option>
+                            <option value="Internship">Internship</option>
+                            <option value="Contract">Contract</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-5">
+                        <label for="locationFilter" class="form-label">Filter by Location</label>
+                        <select id="locationFilter" class="form-select">
+                            <option selected>All Locations</option>
+                            <option value="New York">New York</option>
+                            <option value="San Francisco">San Francisco</option>
+                            <option value="Chicago">Chicago</option>
+                            <option value="Remote">Remote</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2 d-flex align-items-end">
+                        <button type="button" class="btn btn-primary w-100">Apply</button>
+                    </div>
+                </form>
+
                 <div class="list-group">
-                    <!-- Dynamic Job Listings -->
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">Software Engineer</h5>
-                            <p class="mb-1">React and Node.js experience required. Full-time, remote position.</p>
-                            <span class="badge bg-secondary">Full-time</span>
+                    {% for job in jobs.items %}
+                    <div class="list-group-item d-flex justify-content-between align-items-center shadow-sm rounded-3 mb-3">
+                        <div class="d-flex flex-column">
+                            <h5 class="mb-1">
+                                <a href="#" class="text-decoration-none text-primary">
+                                    {{ job.position }}
+                                </a>
+                            </h5>
+                            <p class="mb-2">{{ job.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-secondary">{{ job.job_type }}</span>
+                            </div>
                         </div>
-                        <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">Product Manager</h5>
-                            <p class="mb-1">Work with cross-functional teams to create new products.</p>
-                            <span class="badge bg-secondary">Part-time</span>
+                        <div class="text-end text-muted small">
+                            {{ job.recruiter.company.name }}
                         </div>
-                        <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
                     </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">UX Designer</h5>
-                            <p class="mb-1">Design user-centric products, collaborate with engineering teams.</p>
-                            <span class="badge bg-secondary">Full-time</span>
-                        </div>
-                        <a href="#" class="btn btn-sm btn-outline-primary">View Details</a>
-                    </div>
-                    <!-- Add more dynamic job listings here -->
+                    {% endfor %}
                 </div>
+
+                <!-- Pagination -->
+                <nav class="d-flex justify-content-center mt-4">
+                    <ul class="pagination">
+                        {% if jobs.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.dashboard', page=jobs.prev_num) }}">Previous</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                        {% endif %}
+
+                        {% for p in range(1, jobs.pages + 1) %}
+                        <li class="page-item {% if p == jobs.page %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('main.dashboard', page=p) }}">{{ p }}</a>
+                        </li>
+                        {% endfor %}
+
+                        {% if jobs.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.dashboard', page=jobs.next_num) }}">Next</a>
+                        </li>
+                        {% else %}
+                        <li class="page-item disabled"><span class="page-link">Next</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
             </div>
 
             <!-- Right Section: Upcoming Interviews -->
@@ -91,7 +139,6 @@
                             <span class="badge bg-info text-dark">Scheduled</span>
                         </div>
                     </div>
-                    <!-- Add more dynamic upcoming interviews here -->
                 </div>
             </div>
         </div>
