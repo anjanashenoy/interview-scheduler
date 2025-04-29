@@ -31,20 +31,16 @@ class Recruiter(db.Model):
 
 class University(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    phone = db.Column(db.String(15))
-    address = db.Column(db.String(200))
+    name = db.Column(db.String(100), nullable=False)
 
 class Company(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100))
-    phone = db.Column(db.String(15))
-    address = db.Column(db.String(200))
 
 class Reference(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     student_id = db.Column(db.Integer, db.ForeignKey('student.user_id'))
-    content = db.Column(db.String(500))
+    content = db.Column(db.Text)
     is_private = db.Column(db.Boolean, default=False)
     name = db.Column(db.String(100))
     relationship = db.Column(db.String(100))
@@ -68,6 +64,6 @@ class InterviewSlot(db.Model):
     meeting_id = db.Column(db.String(15), nullable=False)
 
     status = db.Column(db.String(20), default=InterviewStatus.available)
-    next_steps = db.Column(db.String(5000), nullable=True)
+    next_steps = db.Column(db.Text, nullable=True)
 
     student = db.relationship('Student', backref='interview_slot')
