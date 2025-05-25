@@ -64,6 +64,14 @@ class InterviewSlot(db.Model):
     meeting_id = db.Column(db.String(15), nullable=False)
 
     status = db.Column(db.String(20), default=InterviewStatus.available)
-    next_steps = db.Column(db.Text, nullable=True)
 
     student = db.relationship('Student', backref='interview_slot')
+    next_steps = db.relationship('NextStep', back_populates='interview_slot', cascade='all, delete-orphan', order_by='NextStep.timestamp')
+
+class NextStep(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    interview_slot_id = db.Column(db.Integer, db.ForeignKey('interview_slot.id'), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    timestamp = db.Column(db.DateTime, default=db.func.now())
+
+    interview_slot = db.relationship('InterviewSlot', back_populates='next_steps')

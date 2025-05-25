@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Details</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        h2, h4 {
+            font-weight: 600;
+        }
+        .card {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+        .card-body {
+            padding: 1.5rem;
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        .btn-outline-primary, .btn-outline-secondary {
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/dashboard">← Back to Dashboard</a>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <div class="card p-4 shadow-sm">
+        <div class="card-body">
+            <h2 class="mb-4">Interview Details</h2>
+            <h4 class="mb-3">{{ interview.job.position }} - Interview</h4>
+            <p><strong>Date/Time:</strong> {{ interview.datetime.strftime('%a, %b %d @ %I:%M %p') }}</p>
+            <p><strong>Zoom Meeting:</strong> <a href="https://zoom.us/j/{{ interview.meeting_id }}" target="_blank">{{ interview.meeting_id }}</a></p>
+            {% if current_user.user_type == "recruiter" %}
+                <p><strong>Student:</strong> <a href="/student/{{ interview.student.user.id }}">{{ name }}</a></p>
+                <p><strong>Email:</strong> <a href="mailto:{{ interview.student.email }}">{{ interview.student.user.email }}</a></p>
+                <h5 class="mt-4">Comments</h5>
+                {% if next_steps %}
+                    {% for comment in next_steps %}
+                        <p>{{ comment.content }}<br>
+                        <small class="text-muted">{{ comment.timestamp.strftime('%b %d, %Y %I:%M %p') }}</small></p>
+                    {% endfor %}
+                {% else %}
+                    <p>No next steps yet. Please check back!</p>
+                {% endif %}
+                <form method="POST" action="{{ url_for('main.add_next_steps', slot_id=interview.id) }}">
+                    <div class="mb-3">
+                        <label for="next_steps" class="form-label">Enter Next Steps:</label>
+                        <textarea class="form-control" id="next_steps" name="next_steps" rows="3" placeholder="e.g., Schedule follow-up interview, Review portfolio, etc."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-outline-primary mt-3">Save Next Steps</button>
+                </form>
+            {% else %}
+                <h5 class="mt-4">Recruiter/Company Information</h5>
+                <p><strong>Recruiter:</strong> {{ interview.job.recruiter.name }}</p>
+                <p><strong>Company:</strong> {{ interview.job.recruiter.company.name }}</p>
+                <h5 class="mt-4">Comments</h5>
+                {% if next_steps %}
+                    {% for comment in next_steps %}
+                        <p>{{ comment.content }} <br><small class="text-muted">{{ comment.timestamp.strftime('%b %d, %Y %I:%M %p') }}</small></p>
+                    {% endfor %}
+                {% else %}
+                    <p>No next steps yet. Please check back!</p>
+                {% endif %}
+            {% endif %}
+        </div>
+        {% if interview.status == 'scheduled' %}
+        {% if current_user.user_type == "student" and interview.student_id == current_user.id %}
+            <form method="POST" action="/cancel_slot/{{ interview.id }}">
+                <button type="submit" class="btn btn-danger mt-4">Cancel Interview</button>
+            </form>
+        {% elif current_user.user_type == "recruiter" and interview.job.recruiter_id == current_user.id %}
+            <form method="POST" action="/cancel_slot/{{ interview.id }}">
+                <button type="submit" class="btn btn-danger mt-4">Cancel Interview</button>
+            </form>
+        {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

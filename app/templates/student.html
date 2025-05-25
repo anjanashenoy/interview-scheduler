@@ -6,16 +6,53 @@
     <title>Student Dashboard</title>
     <!-- Bootstrap 5 CDN -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .btn-outline-danger {
+            border-color: #ff6b6b;
+            color: #ff6b6b;
+        }
+    
+        .btn-outline-danger:hover {
+            background-color: #ff6b6b;
+            color: white;
+        }
+    
+        .badge.bg-primary {
+            background-color: #007bff;
+        }
+    
+        .position-relative {
+            position: relative;
+        }
+    
+        .position-absolute {
+            position: absolute;
+        }
+    
+        .top-0 {
+            top: 0;
+        }
+    
+        .end-0 {
+            right: 0;
+        }
+    
+        .mt-2 {
+            margin-top: 0.5rem;
+        }
+    
+        .me-2 {
+            margin-right: 0.5rem;
+        }
+    </style>    
 </head>
 <body class="bg-light">
-
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Interview Scheduler</a>
             <div class="d-flex align-items-center ms-auto">
                 <span class="text-white me-3">Welcome, {{ name }}!</span>
-                <a href="#" class="btn btn-outline-light btn-sm me-2">My Profile</a>
+                <a href="{{ url_for('main.student_profile', student_id=current_user.id )}}" class="btn btn-outline-light btn-sm me-2">My Profile</a>
                 <form action="{{ url_for('main.logout') }}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
                 </form>
@@ -23,21 +60,20 @@
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container mt-5">
+    <div class="container mt-5 pt-5">
         <div class="row">
-            <!-- Left Section: Open Jobs -->
+            <!-- Open Jobs -->
             <div class="col-md-8">
                 <div class="d-flex justify-content-between align-items-center mb-4">
                     <h2 class="mb-0">Open Jobs</h2>
                 </div>
 
-                <!-- Filter Controls -->
-                <form class="row g-3 mb-4">
-                    <div class="col-md-5">
-                        <label for="jobTypeFilter" class="form-label">Filter by Job Type</label>
-                        <select id="jobTypeFilter" class="form-select">
-                            <option selected>All Job Types</option>
+               <!-- Filters -->
+                <form class="row align-items-end g-3 mb-4" method="get" action="{{ url_for('main.dashboard') }}">
+                    <div class="col-md-3">
+                        <label for="jobTypeFilter" class="form-label">Job Type</label>
+                        <select id="jobTypeFilter" name="job_type" class="form-select">
+                            <option value="">All</option>
                             <option value="Full-Time">Full-Time</option>
                             <option value="Part-Time">Part-Time</option>
                             <option value="Internship">Internship</option>
@@ -45,10 +81,10 @@
                         </select>
                     </div>
 
-                    <div class="col-md-5">
-                        <label for="locationFilter" class="form-label">Filter by Location</label>
-                        <select id="locationFilter" class="form-select">
-                            <option selected>All Locations</option>
+                    <div class="col-md-3">
+                        <label for="locationFilter" class="form-label">Location</label>
+                        <select id="locationFilter" name="location" class="form-select">
+                            <option value="">All</option>
                             <option value="New York">New York</option>
                             <option value="San Francisco">San Francisco</option>
                             <option value="Chicago">Chicago</option>
@@ -56,27 +92,35 @@
                         </select>
                     </div>
 
-                    <div class="col-md-2 d-flex align-items-end">
-                        <button type="button" class="btn btn-primary w-100">Apply</button>
+                    <div class="col-md-4">
+                        <label for="keywordInput" class="form-label">Keyword</label>
+                        <input type="text" class="form-control" id="keywordInput" name="keyword" placeholder="Search...">
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Apply</button>
                     </div>
                 </form>
 
                 <div class="list-group">
                     {% for job in jobs.items %}
-                    <div class="list-group-item d-flex justify-content-between align-items-center shadow-sm rounded-3 mb-3">
-                        <div class="d-flex flex-column">
-                            <h5 class="mb-1">
-                                <a href="#" class="text-decoration-none text-primary">
-                                    {{ job.position }}
-                                </a>
-                            </h5>
-                            <p class="mb-2">{{ job.description }}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-secondary">{{ job.job_type }}</span>
+                    <div class="card mb-3 shadow-sm border-0 rounded-4">
+                        <div class="card-body d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-1">
+                                    <a href="{{ url_for('main.job_details', job_id=job.id) }}" class="text-decoration-none text-dark fw-semibold">
+                                        {{ job.position }}
+                                    </a>
+                                </h5>
+                                <p class="text-muted mb-2 small">{{ job.description }}</p>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <span class="badge bg-primary-subtle text-primary fw-medium">{{ job.job_type }}</span>
+                                    <span class="badge bg-light text-secondary border">{{ job.location }}</span>
+                                </div>
                             </div>
-                        </div>
-                        <div class="text-end text-muted small">
-                            {{ job.recruiter.company.name }}
+                            <div class="text-end text-muted small mt-1 ms-3">
+                                <span class="fw-medium">{{ job.recruiter.company.name }}</span>
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
@@ -87,7 +131,7 @@
                     <ul class="pagination">
                         {% if jobs.has_prev %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for('main.dashboard', page=jobs.prev_num) }}">Previous</a>
+                            <a class="page-link" href="{{ url_for('main.dashboard', page=jobs.prev_num, job_type=job_type, location=location, keyword=keyword) }}">Previous</a>
                         </li>
                         {% else %}
                         <li class="page-item disabled"><span class="page-link">Previous</span></li>
@@ -95,13 +139,13 @@
 
                         {% for p in range(1, jobs.pages + 1) %}
                         <li class="page-item {% if p == jobs.page %}active{% endif %}">
-                            <a class="page-link" href="{{ url_for('main.dashboard', page=p) }}">{{ p }}</a>
+                            <a class="page-link" href="{{ url_for('main.dashboard', page=p, job_type=job_type, location=location, keyword=keyword) }}">{{ p }}</a>
                         </li>
                         {% endfor %}
 
                         {% if jobs.has_next %}
                         <li class="page-item">
-                            <a class="page-link" href="{{ url_for('main.dashboard', page=jobs.next_num) }}">Next</a>
+                            <a class="page-link" href="{{ url_for('main.dashboard', page=jobs.next_num, job_type=job_type, location=location, keyword=keyword) }}">Next</a>
                         </li>
                         {% else %}
                         <li class="page-item disabled"><span class="page-link">Next</span></li>
@@ -110,39 +154,82 @@
                 </nav>
             </div>
 
-            <!-- Right Section: Upcoming Interviews -->
+            <!-- Scheduled & Completed Interviews -->
             <div class="col-md-4">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h2 class="mb-0">Upcoming Interviews</h2>
+                    <h2 class="mb-0">My Interviews</h2>
                 </div>
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="mt-4">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                    </div>
+                {% endif %}
+                {% endwith %}
 
-                <div class="list-group">
-                    <!-- Dynamic Upcoming Interviews -->
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">Software Engineer Interview</h5>
-                            <p class="mb-1">Monday, April 20 at 10:00 AM</p>
-                            <span class="badge bg-info text-dark">Scheduled</span>
-                        </div>
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Upcoming Interviews</h4>
+                        <ul class="list-group list-group-flush">
+                            {% if interviews %}
+                                {% for interview in interviews %}
+                                    {% if interview.status == 'scheduled' %}
+                                        <li class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div>
+                                                    <strong>{{ interview.job.position }}</strong><br>
+                                                    <small class="text-muted">{{ interview.datetime.strftime('%a, %b %d @ %I:%M %p') }}</small>
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <a href="{{ url_for('main.interview_details', slot_id=interview.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                                    <a href="https://zoom.us/j/{{ interview.meeting_id }}" target="_blank" class="btn btn-sm btn-primary text-white">Zoom</a>
+                                                </div>
+                                            </div>                                            
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="list-group-item text-muted">No completed interviews.</li>
+                            {% endif %}
+                        </ul>
                     </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">Product Manager Interview</h5>
-                            <p class="mb-1">Tuesday, April 21 at 02:00 PM</p>
-                            <span class="badge bg-info text-dark">Scheduled</span>
-                        </div>
-                    </div>
-                    <div class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h5 class="mb-1">UX Designer Interview</h5>
-                            <p class="mb-1">Thursday, April 23 at 11:00 AM</p>
-                            <span class="badge bg-info text-dark">Scheduled</span>
-                        </div>
+                </div>
+            
+                <!-- Past Interviews -->
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title mb-3">Past Interviews</h4>
+                        <ul class="list-group list-group-flush">
+                            {% if interviews %}
+                                {% for interview in interviews %}
+                                    {% if interview.status == 'completed' %}
+                                        <li class="list-group-item">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <strong>{{ interview.job.position }}</strong><br>
+                                                    <small class="text-muted">{{ interview.datetime.strftime('%a, %b %d @ %I:%M %p') }}</small>
+                                                </div>
+                                                <a href="{{ url_for('main.interview_details', slot_id=interview.id) }}" class="btn btn-sm btn-outline-primary">View</a>
+                                            </div>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="list-group-item text-muted">No upcoming interviews.</li>
+                            {% endif %}
+                        </ul>
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

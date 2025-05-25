@@ -1,0 +1,167 @@
+{% extends "base.html" %}
+{% block title %}{{ student.full_name }}'s Profile{% endblock %}
+
+{% block content %}
+<style>
+    .card {
+      transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for scaling and shadow */
+    }
+  
+    .card:hover {
+      transform: scale(1.05); /* Slightly scale up the card */
+      box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2); /* Add shadow to give a floating effect */
+    }
+  </style>
+<div class="container py-5">
+  <!-- Profile Header Section -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="fw-semibold">{{ student.full_name }}</h2>
+  </div>
+
+  <!-- Profile Information - Two Columns -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="card-title">Profile Information</h5>
+          <p><strong>Email:</strong> {{ student.email }}</p>
+          <p><strong>Date of Birth:</strong> {{ student.date_of_birth.strftime('%B %d, %Y') if student.date_of_birth else 'N/A' }}</p>
+          <p><strong>Enrollment Year:</strong> {{ student.enrollment_year }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card shadow-sm border-0">
+        <div class="card-body">
+          <h5 class="card-title">Additional Information</h5>
+          <p><strong>Major:</strong> {{ student.major }}</p>
+          <p><strong>GPA:</strong> {{ '%.2f' | format(student.gpa) if student.gpa else 'N/A' }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Courses Section (Table) -->
+  <h4 class="mb-3">Courses</h4>
+  {% if courses %}
+    <div class="table-responsive mb-5">
+      <table class="table table-hover align-middle shadow-sm">
+        <thead class="table-light">
+          <tr>
+            <th scope="col">Code</th>
+            <th scope="col">Name</th>
+            <th scope="col">Department</th>
+            <th scope="col">Credits</th>
+            <th scope="col">Semester</th>
+            <th scope="col">Grade</th>
+            <th scope="col">Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for course in courses %}
+            <tr>
+              <td>{{ course.course_code }}</td>
+              <td>{{ course.course_name }}</td>
+              <td>{{ course.department }}</td>
+              <td>{{ course.credits }}</td>
+              <td>{{ course.semester }}</td>
+              <td>{{ '%.2f' | format(course.grade) if course.grade is not none else 'N/A' }}</td>
+              <td>{{ course.status }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p class="text-muted">No course records available.</p>
+  {% endif %}
+
+  <hr class="my-5">
+
+  <!-- References Section -->
+  <h4 class="mb-3">References</h4>
+  {% if references %}
+    <div class="row g-4">
+      {% for reference in references %}
+        <div class="col-md-4">
+          <div class="card shadow-lg border-0 rounded-lg">
+            <div class="card-header" style="background-color: #5f6368; color: white; padding: 10px 15px;">
+              <div class="d-flex align-items-center">
+                <div class="icon-container">
+                  <i class="fas fa-user-circle fa-3x"></i>
+                </div>
+                <div class="ms-3">
+                  <h5 class="card-title mb-0">{{ reference.name }}</h5>
+                  <p class="text-white mb-0">{{ reference.relationship }}</p>
+                </div>
+              </div>
+            </div>
+            <div class="card-body p-4">
+              <div class="card-text mb-3">
+                <p><strong>Email:</strong> {{ reference.email if reference.email else 'N/A' }}</p>
+                <p><strong>Phone Number:</strong> {{ reference.phone if reference.phone else 'N/A' }}</p>
+                <p>
+                  <strong>Content:</strong>
+                  {% if reference.is_private and not current_user.user_type == 'recruiter' %}
+                    <em>Private</em>
+                  {% else %}
+                    {{ reference.content }}
+                  {% endif %}
+                </p>
+              </div>
+              <a href="mailto:{{ reference.email }}" class="btn btn-outline-primary btn-sm">Contact</a>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No references available.</p>
+  {% endif %}
+
+  <!-- Reference Request Section -->
+  {% if current_user.user_type == 'student' %}
+  <div class="row g-4 mt-5">
+    <div class="col-md-6">
+      <h4 class="mb-3">Request a Reference</h4>
+      <form method="POST" action="{{ url_for('main.generate_reference') }}" class="card p-4 shadow-sm border-0">
+        <div class="mb-3">
+          <label for="ref_name" class="form-label">Reference Name</label>
+          <input type="text" class="form-control" id="ref_name" name="ref_name" required>
+        </div>
+        <div class="mb-3">
+          <label for="ref_email" class="form-label">Reference Email</label>
+          <input type="email" class="form-control" id="ref_email" name="ref_email" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Generate Link</button>
+      </form>
+    </div>
+
+    <div class="col-md-6">
+      {% if reference_link %}
+        <div class="alert alert-success">
+          <strong>Success!</strong> Share this link with your reference:
+          <div class="d-flex align-items-center mt-2">
+            <input type="text" class="form-control me-2" value="{{ reference_link }}" id="referenceLink" readonly>
+            <button class="btn btn-outline-secondary" onclick="copyLink()">Copy</button>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<script>
+  function copyLink() {
+    var copyText = document.getElementById("referenceLink");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999);
+    document.execCommand("copy");
+
+    alert("Link copied to clipboard!");
+  }
+</script>
+
+{% endblock %}

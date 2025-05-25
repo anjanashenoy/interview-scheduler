@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Submit Reference{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <h2>Submit a Reference</h2>
+  <p>For: {{ ref_name }} ({{ ref_email }})</p>
+
+  <!-- Flash Messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="alert alert-dismissible fade show" role="alert">
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }} mt-2">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <form method="POST">
+    <div class="form-group">
+      <label for="relationship">Your Relationship to the Student</label>
+      <input type="text" class="form-control" id="relationship" name="relationship" required>
+    </div>
+    <div class="form-group mt-3">
+      <label for="content">Reference Letter</label>
+      <textarea class="form-control" id="content" name="content" rows="6" required></textarea>
+    </div>
+    <div class="form-group mt-3">
+      <label for="phone">Your Phone Number</label>
+      <input type="text" class="form-control" id="phone" name="phone">
+    </div>
+    <div class="form-check mt-3">
+      <input class="form-check-input" type="checkbox" id="is_private" name="is_private">
+      <label class="form-check-label" for="is_private">
+        Mark this reference as private
+      </label>
+    </div>
+    <button type="submit" class="btn btn-success mt-3">Submit</button>
+  </form>
+</div>
+{% endblock %}

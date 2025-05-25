@@ -9,42 +9,28 @@ from . import db
 def seed_command():
     universities = [
         {
-            "name": "Northwestern University",
-            "phone": "847-491-3741",
-            "address": "633 Clark St, Evanston, IL 60208"
+            "name": "Northwestern University"
         },
         {
-            "name": "University of Maryland",
-            "phone": "301-405-1000",
-            "address": "College Park, MD 20742"
+            "name": "University of Maryland"
         }
     ]
 
     companies = [
         {
-            "name": "TechNova Inc",
-            "phone": "312-555-0198",
-            "address": "500 W Madison St, Chicago, IL 60661"
+            "name": "Google"
         },
         {
-            "name": "GreenByte Solutions",
-            "phone": "415-555-2323",
-            "address": "22 Market St, San Francisco, CA 94103"
+            "name": "Microsoft"
         },
         {
-            "name": "QuantumSoft",
-            "phone": "212-555-0071",
-            "address": "88 Wall St, New York, NY 10005"
+            "name": "Netflix"
         },
         {
-            "name": "NeuralEdge AI",
-            "phone": "206-555-3210",
-            "address": "1200 5th Ave, Seattle, WA 98101"
+            "name": "Blackstone"
         },
         {
-            "name": "CloudBridge Corp",
-            "phone": "617-555-8844",
-            "address": "200 Cambridge Park Dr, Cambridge, MA 02140"
+            "name": "Apple"
         }
     ]
 

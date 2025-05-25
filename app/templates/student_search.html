@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Search</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Interview Scheduler</a>
+            <div class="d-flex align-items-center ms-auto">
+                <span class="text-white me-3">Welcome, {{ name }}!</span>
+                <a href="{{ url_for('main.calendar') }}" class="btn btn-outline-light btn-sm me-2">Calendar</a>
+                <a href="/students" class="btn btn-outline-light btn-sm me-2">Student Search</a>
+                <form action="{{ url_for('main.logout') }}" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+                </form>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5"> <!-- Added mt-5 for spacing -->
+        <div class="row">
+            <div class="col-md-8 offset-md-2"> <!-- Added offset-md-2 to center content -->
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">Search Students</h2>
+                </div>
+
+                <!-- Filter Controls -->
+                <form class="row align-items-end g-3 mb-4" method="get" action="{{ url_for('main.students') }}">
+                    <!-- GPA Filter -->
+                    <div class="col-md-3">
+                        <label for="gpaFilter" class="form-label">GPA</label>
+                        <select id="gpaFilter" name="gpa" class="form-select">
+                            <option value="">All</option>
+                            <option value="3.0">3.0+</option>
+                            <option value="3.5">3.5+</option>
+                            <option value="4.0">4.0</option>
+                        </select>
+                    </div>
+
+                    <!-- Major Filter -->
+                    <div class="col-md-3">
+                        <label for="majorFilter" class="form-label">Major</label>
+                        <select id="majorFilter" name="major" class="form-select">
+                            <option value="">All</option>
+                            <option value="Computer Science">Computer Science</option>
+                            <option value="Mechanical Engineering">Mechanical Engineering</option>
+                            <option value="Business">Business</option>
+                            <option value="Mathematics">Mathematics</option>
+                        </select>
+                    </div>
+
+                    <!-- Keyword Search -->
+                    <div class="col-md-4 search-bar">
+                        <label for="keywordInput" class="form-label">Keyword</label>
+                        <input type="text" class="form-control" id="keywordInput" name="keyword" placeholder="Search by name or email">
+                    </div>
+
+                    <!-- Apply Button -->
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                    </div>
+                </form>
+
+                <!-- Student List -->
+                <div class="list-group">
+                    {% for student in students %}
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h5 class="card-title mb-1">
+                                    <a href="{{ url_for('main.student_profile', student_id=student.id) }}" class="text-decoration-none text-dark fw-semibold">
+                                        {{ student.full_name }}
+                                    </a>
+                                </h5>
+                                <p class="text-muted mb-2 small">{{ student.major_name }}</p>
+                                <div class="d-flex gap-2 flex-wrap">
+                                    <span class="badge bg-primary-subtle text-primary fw-medium">{{ student.gpa }}</span>
+                                    <span class="badge bg-light text-secondary border">{{ student.enrollment_year }}</span>
+                                </div>
+                            </div>
+                            <div class="text-end text-muted small mt-1 ms-3">
+                                <span class="fw-medium">{{ student.university_email }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Pagination -->
+                <nav class="d-flex justify-content-center mt-4">
+                    <ul class="pagination">
+                        {% if has_prev %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('main.students', page=page-1, gpa=gpa_filter, major=major_filter, keyword=keyword_filter) }}">Previous</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                        {% endif %}
+
+                        {% for p in range(1, total_pages + 1) %}
+                            <li class="page-item {% if p == page %}active{% endif %}">
+                                <a class="page-link" href="{{ url_for('main.students', page=p, gpa=gpa_filter, major=major_filter, keyword=keyword_filter) }}">{{ p }}</a>
+                            </li>
+                        {% endfor %}
+
+                        {% if has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('main.students', page=page+1, gpa=gpa_filter, major=major_filter, keyword=keyword_filter) }}">Next</a>
+                            </li>
+                        {% else %}
+                            <li class="page-item disabled"><span class="page-link">Next</span></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
