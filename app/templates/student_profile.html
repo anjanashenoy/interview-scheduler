@@ -13,12 +13,10 @@
     }
   </style>
 <div class="container py-5">
-  <!-- Profile Header Section -->
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-semibold">{{ student.full_name }}</h2>
   </div>
 
-  <!-- Profile Information - Two Columns -->
   <div class="row g-4 mb-5">
     <div class="col-md-6">
       <div class="card shadow-sm border-0">
@@ -42,7 +40,7 @@
     </div>
   </div>
 
-  <!-- Courses Section (Table) -->
+  <!-- Courses Section -->
   <h4 class="mb-3">Courses</h4>
   {% if courses %}
     <div class="table-responsive mb-5">
@@ -78,6 +76,78 @@
   {% endif %}
 
   <hr class="my-5">
+
+  <!-- Skills & Experience Section -->
+  <div class="row g-4">
+    <div class="col-md-6">
+      {% if current_user.user_type == 'student' %}
+      <h4>Add a Skill</h4>
+      <form method="POST" class="card p-4 shadow-sm border-0">
+        <div class="mb-3">
+          <label for="skill" class="form-label">Skill</label>
+          <input type="text" class="form-control" name="skill" id="skill" placeholder="e.g., Python, SQL" required>
+        </div>
+        <button type="submit" class="btn btn-success w-100">Add Skill</button>
+      </form>
+      {% endif %}
+
+      {% if skills %}
+        <div class="mt-4">
+          <h5>Skills</h5>
+          <ul class="list-group">
+            {% for s in skills %}
+              <li class="list-group-item">{{ s.name }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="col-md-6">
+      {% if current_user.user_type == 'student' %}
+      <h4>Add Experience</h4>
+      <form method="POST" class="card p-4 shadow-sm border-0">
+        <div class="mb-3">
+          <label class="form-label">Title</label>
+          <input type="text" name="exp_title" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Company</label>
+          <input type="text" name="exp_company" class="form-control">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Description</label>
+          <textarea name="exp_description" class="form-control"></textarea>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Start Date</label>
+          <input type="date" name="exp_start" class="form-control" required>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">End Date</label>
+          <input type="date" name="exp_end" class="form-control">
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Add Experience</button>
+      </form>
+      {% endif %}
+
+      {% if experiences %}
+        <div class="mt-4">
+          <h5>Experiences</h5>
+          <ul class="list-group">
+            {% for exp in experiences %}
+              <li class="list-group-item">
+                <strong>{{ exp.title }}</strong> at {{ exp.company or "N/A" }} <br>
+                <small>{{ exp.start_date }} to {{ exp.end_date or "Present" }}</small><br>
+                {{ exp.description }}
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+      {% endif %}
+    </div>
+
+    <hr class="my-5">
 
   <!-- References Section -->
   <h4 class="mb-3">References</h4>
@@ -150,8 +220,10 @@
       {% endif %}
     </div>
   </div>
+  {% endif %}
+  </div>
+
 </div>
-{% endif %}
 
 <script>
   function copyLink() {

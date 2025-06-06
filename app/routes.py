@@ -10,6 +10,7 @@ from flask import jsonify
 from datetime import datetime, timedelta
 from .external_dbs import external_engines
 from itsdangerous import URLSafeSerializer
+from sqlalchemy import or_, and_
 
 main = Blueprint('main', __name__)
 northwestern_external_engine = external_engines['Northwestern University']
@@ -418,7 +419,7 @@ def interview_details(slot_id):
     university_name = student.university.name
 
     try:
-        with external_engines[university].connect() as conn:
+        with external_engines[university_name].connect() as conn:
             result = conn.execute(
                 text("SELECT * FROM student WHERE university_email = :email"),
                 {"email": interview.student.user.email}
@@ -458,18 +459,50 @@ def calendar():
         )
     return render_template('calendar.html', interviews=interviews)
 
-@main.route('/student/<int:student_id>')
+@main.route('/student/<int:student_id>', methods=['GET', 'POST'])
 @login_required
 def student_profile(student_id):
     if current_user.user_type == 'student' and current_user.id != student_id:
         flash("You can only view your own profile.", "warning")
-        return redirect(url_for('main.dashboard'))  
+        return redirect(url_for('main.dashboard'))
+
+    student = Student.query.get(student_id)
+
+    # Handle form submission
+    if request.method == 'POST':
+        skill_name = request.form.get('skill')
+        if skill_name:
+            new_skill = Skill(student_id=student.user_id, name=skill_name.strip())
+            db.session.add(new_skill)
+
+        exp_title = request.form.get('exp_title')
+        exp_company = request.form.get('exp_company')
+        exp_description = request.form.get('exp_description')
+        exp_start = request.form.get('exp_start')
+        exp_end = request.form.get('exp_end')
+
+        if exp_title and exp_start:
+            new_exp = Experience(
+                student_id=student.user_id,
+                title=exp_title.strip(),
+                company=exp_company.strip() if exp_company else None,
+                description=exp_description.strip() if exp_description else None,
+                start_date=exp_start,
+                end_date=exp_end if exp_end else None
+            )
+            db.session.add(new_exp)
+
+        db.session.commit()
+        return redirect(url_for('main.student_profile', student_id=student_id))
 
     context = get_student_profile_context(student_id)
     if not context:
         flash("Unable to load student profile.", "danger")
         return redirect(url_for('main.dashboard'))
 
+    # Add skills and experiences to context
+    context["skills"] = Skill.query.filter_by(student_id=student_id).all()
+    context["experiences"] = Experience.query.filter_by(student_id=student_id).all()
     return render_template("student_profile.html", **context)
 
 @main.route('/students')
@@ -485,16 +518,34 @@ def students():
         'per_page': 10,
         'gpa_filter': request.args.get('gpa', ''),
         'major_filter': request.args.get('major', ''),
-        'keyword_filter': request.args.get('keyword', '')
+        'skill_filter': request.args.get('skill', ''),
+        'experience_filter': request.args.get('experience', '')
     }
 
     page = context['page']
     per_page = context['per_page']
     gpa_filter = context['gpa_filter']
     major_filter = context['major_filter']
-    keyword_filter = context['keyword_filter']
+    skill_filter = context['skill_filter']
+    experience_filter = context['experience_filter']
 
-    # Build the base query for fetching students from the external DB
+    app_students = User.query.filter_by(user_type="student").all()
+    app_student_emails = {student.email for student in app_students}
+
+    if skill_filter:
+        skill_matches = Skill.query.filter(Skill.name.ilike(f"%{skill_filter}%")).all()
+        skill_emails = {s.student.user.email for s in skill_matches}
+        app_student_emails &= skill_emails  # intersect
+
+    if experience_filter:
+        exp_matches = Experience.query.filter(or_(
+            Experience.title.ilike(f"%{experience_filter}%"),
+            Experience.company.ilike(f"%{experience_filter}%"),
+            Experience.description.ilike(f"%{experience_filter}%")
+        )).all()
+        exp_emails = {e.student.user.email for e in exp_matches}
+        app_student_emails &= exp_emails  # intersect again
+
     query = """
         SELECT s.id, s.full_name, s.date_of_birth, s.gpa, s.university_email, m.name AS major_name
         FROM student s
@@ -502,33 +553,35 @@ def students():
         WHERE s.university_email IS NOT NULL
     """
 
-    # Apply filters
     if gpa_filter:
         query += f" AND s.gpa >= {gpa_filter}"
     if major_filter:
         query += f" AND m.name = '{major_filter}'"
-    if keyword_filter:
-        query += f" AND (s.full_name LIKE '%{keyword_filter}%' OR s.university_email LIKE '%{keyword_filter}%')"
 
     count_query = "SELECT COUNT(*) FROM (" + query + ") AS total"
     offset = (page - 1) * per_page
     query += f" LIMIT {per_page} OFFSET {offset}"
 
+    all_students = []
+
     try:
-        app_students = User.query.filter_by(user_type="student").all()
-        app_student_emails = {student.email for student in app_students}
+        for uni_name, engine in external_engines.items():
+            with engine.connect() as conn:
+                student_result = conn.execute(text(query))
+                students = student_result.fetchall()
+                all_students.extend(students)
 
-        with northwestern_external_engine.connect() as conn:
-            student_result = conn.execute(text(query))
-            students = student_result.fetchall()
-
-        active_students = [s for s in students if s.university_email in app_student_emails]
+        active_students = [s for s in all_students if s.university_email in app_student_emails]
 
         total_students = len(active_students)
         total_pages = (total_students + per_page - 1) // per_page
 
+        start_idx = (page - 1) * per_page
+        end_idx = start_idx + per_page
+        paginated_students = active_students[start_idx:end_idx]
+
         context.update({
-            'students': active_students,
+            'students': paginated_students,
             'total_students': total_students,
             'total_pages': total_pages,
             'has_prev': page > 1,
@@ -622,7 +675,7 @@ def get_student_profile_context(student_id):
         return None
 
     student_email = student.email
-    university = student.university.name
+    university = student.student.university.name
 
     try:
         with external_engines[university].connect() as conn:

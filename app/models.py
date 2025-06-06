@@ -75,3 +75,19 @@ class NextStep(db.Model):
     timestamp = db.Column(db.DateTime, default=db.func.now())
 
     interview_slot = db.relationship('InterviewSlot', back_populates='next_steps')
+
+class Skill(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.user_id'), nullable=False)
+    name = db.Column(db.String(100), nullable=False)
+    student = db.relationship('Student', backref='skills')
+
+class Experience(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    student_id = db.Column(db.Integer, db.ForeignKey('student.user_id'), nullable=False)
+    title = db.Column(db.String(100), nullable=False)
+    company = db.Column(db.String(100))
+    description = db.Column(db.Text)
+    start_date = db.Column(db.Date)
+    end_date = db.Column(db.Date)
+    student = db.relationship('Student', backref='experiences')
