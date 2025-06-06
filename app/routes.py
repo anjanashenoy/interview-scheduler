@@ -311,7 +311,7 @@ def job_details(job_id):
         scheduled_times=scheduled_times
     )
 
-@main.route('/interviews/add', methods=['POST'])
+@main.route('/interviews/add/<int:job_id>', methods=['POST'])
 @login_required
 def add_slot(job_id):
     if current_user.user_type != 'recruiter':
