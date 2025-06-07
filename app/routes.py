@@ -531,13 +531,15 @@ def students():
     skill_filter = context['skill_filter']
     experience_filter = context['experience_filter']
 
+    # Internal app students (with email + internal user ID)
     app_students = User.query.filter_by(user_type="student").all()
     app_student_emails = {student.email for student in app_students}
+    internal_email_to_id = {student.email: student.id for student in app_students}
 
     if skill_filter:
         skill_matches = Skill.query.filter(Skill.name.ilike(f"%{skill_filter}%")).all()
         skill_emails = {s.student.user.email for s in skill_matches}
-        app_student_emails &= skill_emails  # intersect
+        app_student_emails &= skill_emails
 
     if experience_filter:
         exp_matches = Experience.query.filter(or_(
@@ -546,7 +548,7 @@ def students():
             Experience.description.ilike(f"%{experience_filter}%")
         )).all()
         exp_emails = {e.student.user.email for e in exp_matches}
-        app_student_emails &= exp_emails  # intersect again
+        app_student_emails &= exp_emails
 
     query = """
         SELECT s.id, s.full_name, s.date_of_birth, s.gpa, s.university_email, m.name AS major_name
@@ -573,7 +575,13 @@ def students():
                 students = student_result.fetchall()
                 all_students.extend(students)
 
-        active_students = [s for s in all_students if s.university_email in app_student_emails]
+        active_students = []
+        for s in all_students:
+            if s.university_email in app_student_emails:
+                s_dict = dict(s._mapping)
+                # Add internal ID so links work
+                s_dict['internal_id'] = internal_email_to_id[s.university_email]
+                active_students.append(s_dict)
 
         total_students = len(active_students)
         total_pages = (total_students + per_page - 1) // per_page

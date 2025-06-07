@@ -80,9 +80,9 @@
                         <div class="card-body d-flex justify-content-between align-items-start">
                             <div class="flex-grow-1">
                                 <h5 class="card-title mb-1">
-                                    <a href="{{ url_for('main.student_profile', student_id=student.id) }}" class="text-decoration-none text-dark fw-semibold">
+                                    <a href="{{ url_for('main.student_profile', student_id=student.internal_id) }}" class="text-decoration-none text-dark fw-semibold">
                                         {{ student.full_name }}
-                                    </a>
+                                    </a>                                    
                                 </h5>
                                 <p class="text-muted mb-2 small">{{ student.major_name }}</p>
                                 <div class="d-flex gap-2 flex-wrap">
