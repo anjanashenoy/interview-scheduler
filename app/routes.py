@@ -226,6 +226,8 @@ def dashboard():
                 slot.status = 'completed'
                 db.session.commit()
 
+        locations = [loc[0] for loc in Job.query.with_entities(Job.location).distinct().all() if loc[0]]
+        context['locations'] = locations
         context['interviews'] = interviews
         context['job_type'] = job_type
         context['location'] = location
@@ -344,7 +346,7 @@ def book_slot(slot_id):
         return redirect(url_for('main.job_details', job_id=slot.job_id))
 
     # get current student's scheduled slots
-    scheduled_slots = InterviewSlot.query.filter_by(student_id=current_user.id).all()
+    scheduled_slots = InterviewSlot.query.filter_by(student_id=current_user.id, status=InterviewStatus.scheduled.value).all()
 
     # prevent booking multiple slots for the same job
     for s in scheduled_slots:

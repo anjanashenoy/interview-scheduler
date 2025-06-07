@@ -74,10 +74,9 @@
                         <label for="jobTypeFilter" class="form-label">Job Type</label>
                         <select id="jobTypeFilter" name="job_type" class="form-select">
                             <option value="">All</option>
-                            <option value="Full-Time">Full-Time</option>
-                            <option value="Part-Time">Part-Time</option>
+                            <option value="Full-time">Full-Time</option>
+                            <option value="Part-time">Part-Time</option>
                             <option value="Internship">Internship</option>
-                            <option value="Contract">Contract</option>
                         </select>
                     </div>
 
@@ -85,10 +84,9 @@
                         <label for="locationFilter" class="form-label">Location</label>
                         <select id="locationFilter" name="location" class="form-select">
                             <option value="">All</option>
-                            <option value="New York">New York</option>
-                            <option value="San Francisco">San Francisco</option>
-                            <option value="Chicago">Chicago</option>
-                            <option value="Remote">Remote</option>
+                            {% for location in locations %}
+                            <option value="{{location}}">{{location}}</option>
+                            {% endfor %}
                         </select>
                     </div>
 
